@@ -1,9 +1,11 @@
 import DarkMode from "@/components/shared/dark-mode";
 import { Button } from "@/components/ui/button";
+import { routes } from "@/config/routes";
+import Link from "next/link";
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="space-y-4">
       <h2 className="text-2xl font-semibold text-purple-700">
         Welcome love and money!!
       </h2>
@@ -14,8 +16,9 @@ const HomePage = () => {
         quis eaque hic eius odio labore perspiciatis itaque laborum nihil
         tenetur.
       </p>
-      <Button size="lg">Testing ShadCN</Button>
-      <DarkMode />
+      <Button size="lg" asChild>
+        <Link href={routes.dashboard}>Go to Dashboard</Link>
+      </Button>
     </div>
   );
 };

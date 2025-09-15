@@ -1,9 +1,9 @@
 "use client";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { LayoutProps } from "@/config/types";
 import NextTopLoader from "nextjs-toploader";
-import { Toaster } from "sonner";
 
 const Providers = ({ children }: LayoutProps) => {
   return (
