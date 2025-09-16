@@ -8,6 +8,7 @@ import Link from "next/link";
 import SignOutButton from "./sign-out-button";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { KeySquare } from "lucide-react";
 
 const NavbarDashboard = async () => {
   const session = await auth.api.getSession({
@@ -53,7 +54,10 @@ const NavbarDashboard = async () => {
             <SignOutButton size="sm" className="w-28" />
           ) : (
             <Button asChild variant="default" size="sm">
-              <Link href={routes.login}>Login</Link>
+              <Link href={routes.login} className="flex-center">
+                <KeySquare className="size-3.5" />
+                <nav>Login</nav>
+              </Link>
             </Button>
           )}
         </div>

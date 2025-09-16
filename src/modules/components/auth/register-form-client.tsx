@@ -1,13 +1,16 @@
 "use client";
 
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useRef,
-  useTransition,
-} from "react";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { registerSchema } from "@/schemas/auth-schemas";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { signUp } from "@/lib/auth-client";
+import { ListRestart, Loader2, UserRoundPlus } from "lucide-react";
+import { routes } from "@/config/routes";
 import {
   Form,
   FormControl,
@@ -17,91 +20,81 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { loginSchema } from "@/schemas/auth-schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { KeySquare, ListRestart, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import z from "zod";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { routes } from "@/config/routes";
-import { loginAction } from "@/actions/login-action";
+import { Button } from "@/components/ui/button";
 
-const LoginForm = () => {
-  const [formState, formAction, isPending] = useActionState(loginAction, {
-    success: false,
-    message: undefined,
-    errors: { errors: [], properties: {} },
-  });
+const RegisterForm = () => {
+  const [isRegisterPending, startRegisterTransition] = useTransition();
+
   const router = useRouter();
-  const formRef = useRef<HTMLFormElement>(null);
   const blurActive = () => {
     return (document.activeElement as HTMLElement | null)?.blur();
   };
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
     mode: "onBlur",
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
   const { handleSubmit, control, reset } = form;
 
-  const onSubmit = handleSubmit((data) => {
-    const formData = new FormData();
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    /* //INFO: Calling the Server Action */
-    startTransition(() => {
-      formAction(formData);
+  const onSubmit = (values: z.infer<typeof registerSchema>) => {
+    startRegisterTransition(async () => {
+      await signUp.email(
+        {
+          name: values.name,
+          email: values.email,
+          password: values.password,
+        },
+        {
+          onRequest: () => {},
+          onResponse: () => {},
+          onSuccess: () => {
+            blurActive();
+            router.push(routes.login);
+            toast.success("Registered successfully, you can login now!");
+            reset();
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        },
+      );
     });
-  });
-
-  useEffect(() => {
-    if (
-      formState?.success === true &&
-      formState?.message !== undefined &&
-      formRef.current
-    ) {
-      toast.success(formState?.message);
-      reset();
-      blurActive();
-      router.push(routes.home);
-    }
-
-    if (
-      formState?.success === false &&
-      formState?.message !== undefined &&
-      formRef.current
-    ) {
-      toast.error(formState?.message);
-      const properties = formState?.errors?.properties;
-      if (properties) {
-        for (const [key, value] of Object.entries(properties)) {
-          const messages = Array.isArray(value?.errors)
-            ? value.errors.join(". ")
-            : String(value);
-          toast.error(`Field "${key}": ${messages}`);
-        }
-      }
-    }
-
-    if (
-      formState?.success === false &&
-      formState?.errors?.errors !== undefined &&
-      formState?.errors?.errors.length > 0
-    ) {
-      toast.error(`SERVER: ${formState?.errors?.errors[0]}`);
-    }
-  }, [formState, reset, router]);
+  };
 
   return (
     <div className="grid gap-2">
       <Form {...form}>
-        <form onSubmit={onSubmit} className="space-y-4" ref={formRef}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={control}
+            name="name"
+            render={({ field }) => {
+              return (
+                <FormItem className="gap-1">
+                  <FormLabel
+                    className={cn("data-[error=true]:text-foreground")}
+                  >
+                    Name
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter your name"
+                      autoComplete="off"
+                      className="text-xs"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs italic" />
+                </FormItem>
+              );
+            }}
+          />
           <FormField
             control={control}
             name="email"
@@ -120,7 +113,6 @@ const LoginForm = () => {
                       autoComplete="off"
                       className="text-xs"
                       {...field}
-                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage className="text-xs italic" />
@@ -146,7 +138,6 @@ const LoginForm = () => {
                       autoComplete="off"
                       className="text-xs"
                       {...field}
-                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage className="text-xs italic" />
@@ -160,7 +151,7 @@ const LoginForm = () => {
               variant="secondary"
               className="flex w-full flex-1 items-center justify-center"
               type="button"
-              disabled={isPending}
+              disabled={isRegisterPending}
               onClick={() => {
                 reset();
               }}
@@ -173,17 +164,17 @@ const LoginForm = () => {
               variant="default"
               className="w-full flex-1"
               type="submit"
-              disabled={isPending}
+              disabled={isRegisterPending}
             >
-              {isPending ? (
+              {isRegisterPending ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="size-3.5 animate-spin" />
                   <span>Loading...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  <KeySquare className="size-3.5" />
-                  <span>Log in</span>
+                  <UserRoundPlus className="size-3.5" />
+                  <span>Create user</span>
                 </div>
               )}
             </Button>
@@ -193,4 +184,4 @@ const LoginForm = () => {
     </div>
   );
 };
-export default LoginForm;
+export default RegisterForm;

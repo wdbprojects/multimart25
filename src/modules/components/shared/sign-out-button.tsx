@@ -27,7 +27,7 @@ const SignOutButton = ({
             toast.error(ctx.error.message);
           },
           onSuccess: () => {
-            router.push(routes.login);
+            router.push(routes.home);
             router.refresh();
             toast.warning("You signed out successfully");
           },
