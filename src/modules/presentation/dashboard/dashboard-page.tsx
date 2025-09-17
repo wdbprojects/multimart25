@@ -3,13 +3,15 @@ import DashboardSidebar from "../../sidebar/dashboard-sidebar";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { redirect } from "next/navigation";
+import { routes } from "@/config/routes";
 
 const DashboardPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  // if (!session) redirect(routes.login);
+  if (!session) redirect(routes.login);
 
   return (
     <div className="h-full w-full px-2 py-1">
@@ -28,15 +30,9 @@ const DashboardPage = async () => {
                 </CardHeader>
                 <CardContent>
                   <div className="block w-full">
-                    {session ? (
-                      <pre className="text-wrap">
-                        {JSON.stringify(session, null, 2)}
-                      </pre>
-                    ) : (
-                      <h2 className="text-destructive text-xl font-medium">
-                        Unauthorized
-                      </h2>
-                    )}
+                    <pre className="text-wrap">
+                      {JSON.stringify(session, null, 2)}
+                    </pre>
                   </div>
                 </CardContent>
               </Card>

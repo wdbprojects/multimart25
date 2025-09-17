@@ -56,7 +56,12 @@ const NavbarMain = async () => {
         {/* //INFO: BUTTONS & AUTH */}
         <div className="flex flex-shrink-0 items-center gap-3 p-1">
           <DarkMode />
-          <Badge variant="secondary">ADMIN</Badge>
+          {session ? (
+            <Badge variant="secondary">
+              Welcome <strong>{session.user.name}</strong>
+            </Badge>
+          ) : null}
+
           {session ? (
             <SignOutButton size="sm" className="w-28" />
           ) : (

@@ -11,6 +11,10 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: false,
   },
+  session: {
+    expiresIn: 604800, // 30 days
+    updateAge: 86400, // 1 day
+  },
   plugins: [nextCookies()],
 });
 
