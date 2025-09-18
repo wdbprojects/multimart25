@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 const GetStartedButton = () => {
   const { data: session, isPending } = useSession();
 
-  const href = session ? routes.dashboard : routes.home;
+  const href = session ? routes.products : routes.register;
 
   return (
     <Button

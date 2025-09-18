@@ -43,6 +43,7 @@ export const loginAction = async (
         password: validatedFields.data.password,
       },
     });
+
     return {
       success: true,
       message: `FROM SERVER: User ${email} logged in successfully`,
